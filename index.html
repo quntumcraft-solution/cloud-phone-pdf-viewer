@@ -2,38 +2,71 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QuantumPay Test</title>
+<title>QuantumPay Native Test</title>
+<style>
+body {
+  background: #101827;
+  color: white;
+  font-family: Arial;
+  padding: 12px;
+}
+h3 { color: #00d9a5; }
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #202c40;
+  padding: 10px;
+  font-size: 12px;
+}
+button {
+  padding: 12px;
+  width: 100%;
+  background: #00d9a5;
+  border: 0;
+  margin-bottom: 12px;
+}
+</style>
 </head>
 <body>
-<h3>QuantumPay 4G</h3>
 
-<button onclick="testTel()">TEST TEL</button>
-<button onclick="testSMS()">TEST SMS</button>
+<h3>QUANTUMPAY 4G</h3>
+<p>Native App Integration Diagnostic</p>
 
-<div id="result"></div>
+<button onclick="scan()">SCAN DEVICE APIs</button>
+
+<pre id="result">Ready...</pre>
 
 <script>
-async function testTel() {
- try {
-  let r = await navigator.hasFeature("TelScheme");
-  document.getElementById("result").innerHTML =
-   "TEL SCHEME: " + r;
- } catch(e) {
-  document.getElementById("result").innerHTML =
-   "TEL ERROR: " + e;
- }
-}
+function scan() {
+  let found = [];
 
-async function testSMS() {
- try {
-  let r = await navigator.hasFeature("SmsScheme");
-  document.getElementById("result").innerHTML =
-   "SMS SCHEME: " + r;
- } catch(e) {
-  document.getElementById("result").innerHTML =
-   "SMS ERROR: " + e;
- }
+  const keywords = [
+    "native", "app", "phone",
+    "bridge", "device", "cloud",
+    "android", "intent", "launch"
+  ];
+
+  function inspect(obj, label) {
+    try {
+      Object.getOwnPropertyNames(obj).forEach(key => {
+        if (keywords.some(k =>
+          key.toLowerCase().includes(k)
+        )) {
+          found.push(label + "." + key);
+        }
+      });
+    } catch(e) {}
+  }
+
+  inspect(window, "window");
+  inspect(navigator, "navigator");
+
+  document.getElementById("result").textContent =
+    found.length
+    ? found.join("\n")
+    : "No matching API names found.";
 }
 </script>
+
 </body>
 </html>
