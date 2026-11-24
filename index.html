@@ -1,42 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{background:#101827;color:white;font:18px Arial;padding:15px}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:17px}
-</style>
-</head>
-<body>
-<h2>QUANTUMPAY EXTERNAL TEST</h2>
-<pre id="result"></pre>
+<button onclick="test()">OPEN GUPSHUP PAY</button>
 
 <script>
-let output = "";
-
-try {
-  output += "EXTERNAL TYPE: " + typeof window.external + "\n\n";
-
-  output += "AVAILABLE FUNCTIONS:\n";
-
-  Object.getOwnPropertyNames(window.external).forEach(name => {
-    output += name + "\n";
-  });
-
-  output += "\nPROTOTYPE FUNCTIONS:\n";
-
-  let proto = Object.getPrototypeOf(window.external);
-
-  if(proto) {
-    Object.getOwnPropertyNames(proto).forEach(name => {
-      output += name + "\n";
-    });
+function test() {
+  try {
+    window.external.openURL("gupshup://");
+    document.body.innerHTML += "<p>Command executed</p>";
+  } catch(e) {
+    document.body.innerHTML += "<p>Error: " + e.message + "</p>";
   }
-} catch(e) {
-  output += "ERROR: " + e.message;
 }
-
-document.getElementById("result").textContent = output;
 </script>
-</body>
-</html>
