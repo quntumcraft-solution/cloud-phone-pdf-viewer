@@ -1,31 +1,73 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QuantumPay Test</title>
+
+<style>
+body {
+  background: #101827;
+  color: white;
+  font-family: Arial;
+  padding: 15px;
+}
+h2 {
+  color: #00e6a0;
+  font-size: 23px;
+}
+.card {
+  background: #26364d;
+  padding: 15px;
+  margin: 12px 0;
+  border-radius: 8px;
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+button {
+  width: 100%;
+  padding: 16px;
+  font-size: 19px;
+  margin-top: 15px;
+}
+</style>
+</head>
+
 <body>
-<h3>QuantumPay Launch Test</h3>
-<pre id="result"></pre>
+
+<h2>QUANTUMPAY 4G</h2>
+<div id="result"></div>
+
+<button onclick="scan()">CHECK AGAIN</button>
 
 <script>
-let output = "";
+function scan() {
+ const tests = [
+  ["LaunchQueue", window.launchQueue],
+  ["Android Interface", window.Android],
+  ["WebView", window.AndroidInterface],
+  ["External", window.external],
+  ["App Bridge", window.appBridge],
+  ["Native", window.native]
+ ];
 
-output += "LaunchQueue: " +
-(typeof window.launchQueue) + "\n";
+ let html = "";
 
-output += "Android Interface: " +
-(typeof window.Android) + "\n";
+ tests.forEach(([name, value]) => {
+  let status = typeof value;
 
-output += "WebView: " +
-(typeof window.AndroidInterface) + "\n";
+  html += `
+   <div class="card">
+    <b>${name}</b><br><br>
+    RESULT: ${status.toUpperCase()}
+   </div>
+  `;
+ });
 
-output += "External: " +
-(typeof window.external) + "\n";
+ document.getElementById("result").innerHTML = html;
+}
 
-output += "App Bridge: " +
-(typeof window.appBridge) + "\n";
-
-output += "Native: " +
-(typeof window.native) + "\n";
-
-document.getElementById("result").textContent = output;
+scan();
 </script>
+
 </body>
 </html>
