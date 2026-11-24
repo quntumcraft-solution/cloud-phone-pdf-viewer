@@ -1,72 +1,31 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QuantumPay Native Test</title>
-<style>
-body {
-  background: #101827;
-  color: white;
-  font-family: Arial;
-  padding: 12px;
-}
-h3 { color: #00d9a5; }
-pre {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  background: #202c40;
-  padding: 10px;
-  font-size: 12px;
-}
-button {
-  padding: 12px;
-  width: 100%;
-  background: #00d9a5;
-  border: 0;
-  margin-bottom: 12px;
-}
-</style>
-</head>
 <body>
-
-<h3>QUANTUMPAY 4G</h3>
-<p>Native App Integration Diagnostic</p>
-
-<button onclick="scan()">SCAN DEVICE APIs</button>
-
-<pre id="result">Ready...</pre>
+<h3>QuantumPay Launch Test</h3>
+<pre id="result"></pre>
 
 <script>
-function scan() {
-  let found = [];
+let output = "";
 
-  const keywords = [
-    "native", "app", "phone",
-    "bridge", "device", "cloud",
-    "android", "intent", "launch"
-  ];
+output += "LaunchQueue: " +
+(typeof window.launchQueue) + "\n";
 
-  function inspect(obj, label) {
-    try {
-      Object.getOwnPropertyNames(obj).forEach(key => {
-        if (keywords.some(k =>
-          key.toLowerCase().includes(k)
-        )) {
-          found.push(label + "." + key);
-        }
-      });
-    } catch(e) {}
-  }
+output += "Android Interface: " +
+(typeof window.Android) + "\n";
 
-  inspect(window, "window");
-  inspect(navigator, "navigator");
+output += "WebView: " +
+(typeof window.AndroidInterface) + "\n";
 
-  document.getElementById("result").textContent =
-    found.length
-    ? found.join("\n")
-    : "No matching API names found.";
-}
+output += "External: " +
+(typeof window.external) + "\n";
+
+output += "App Bridge: " +
+(typeof window.appBridge) + "\n";
+
+output += "Native: " +
+(typeof window.native) + "\n";
+
+document.getElementById("result").textContent = output;
 </script>
-
 </body>
 </html>
