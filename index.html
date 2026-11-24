@@ -1,12 +1,62 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuantumPay API Test</title>
+<style>
+body {
+ background:#101827;
+ color:white;
+ font-family:Arial;
+ padding:12px;
+}
+button {
+ width:100%;
+ padding:12px;
+ margin:8px 0;
+}
+</style>
+</head>
 <body>
-<h3>QuantumPay Integration Test</h3>
 
-<a href="upi://pay?pa=test@upi&pn=Test&am=1&cu=INR"
-target="_blank">
-<button>OPEN UPI APP</button>
-</a>
+<h3>QUANTUMPAY 4G</h3>
+<h4>Device API Diagnostic</h4>
+
+<div id="output">Checking...</div>
+
+<button onclick="check()">CHECK AGAIN</button>
+
+<script>
+async function check() {
+ const features = [
+  "TelScheme",
+  "SmsScheme",
+  "AudioPlay",
+  "AudioCapture",
+  "FileUpload",
+  "VideoCapture"
+ ];
+
+ let result = "";
+
+ for (const feature of features) {
+  try {
+   let supported =
+    await navigator.hasFeature(feature);
+
+   result += feature + ": " +
+    (supported ? "YES" : "NO") + "<br>";
+  } catch(e) {
+   result += feature + ": ERROR<br>";
+  }
+ }
+
+ document.getElementById("output").innerHTML =
+ result;
+}
+
+check();
+</script>
 
 </body>
 </html>
