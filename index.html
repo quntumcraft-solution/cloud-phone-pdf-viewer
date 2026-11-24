@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html>
-<body>
-<h3>QuantumPay App Test</h3>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QuantumPay Test</title>
+</head>
+<body style="background:#101827;color:white;text-align:center">
 
-<button onclick="test()">Test App Link</button>
+<h2>QuantumPay 4G</h2>
 
-<p id="msg">Ready</p>
+<button onclick="test1()">Test JavaScript</button>
+<button onclick="test2()">Test UPI Link</button>
+<button onclick="test3()">Test App Link</button>
+
+<p id="result">Ready</p>
 
 <script>
-function test() {
-  document.getElementById("msg").innerText =
-  "Testing application access...";
+function test1(){
+ document.getElementById("result").innerText =
+ "JavaScript Working";
+}
 
-  window.location.href = "intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end";
+function test2(){
+ document.getElementById("result").innerText =
+ "Testing UPI Link";
+
+ window.location.href =
+ "upi://pay?pa=test@upi&pn=Test&am=1&cu=INR";
+}
+
+function test3(){
+ document.getElementById("result").innerText =
+ "Testing Gupshup App";
+ window.location.href = "gupshup://";
 }
 </script>
+
 </body>
 </html>
