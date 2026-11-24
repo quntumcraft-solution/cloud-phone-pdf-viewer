@@ -1,51 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QuantumPay Test</title>
-<style>
-body {
-  background: #101827;
-  color: white;
-  text-align: center;
-  font-family: Arial;
-  padding: 20px;
-}
-button {
-  display: block;
-  width: 100%;
-  padding: 18px;
-  margin: 15px 0;
-  font-size: 18px;
-  background: #087fce;
-  color: white;
-  border: 0;
-}
-</style>
-</head>
 <body>
+<h3>QuantumPay App Test</h3>
 
-<h2>QuantumPay 4G</h2>
-<p>System App Integration Test</p>
+<button onclick="test()">Test App Link</button>
 
-<button onclick="openUSSD()">Test USSD Banking</button>
-
-<button onclick="showInfo()">Check JavaScript</button>
-
-<p id="result">Ready</p>
+<p id="msg">Ready</p>
 
 <script>
-function openUSSD() {
-  document.getElementById("result").innerText =
-  "Trying to open USSD...";
-  window.location.href = "tel:*99%23";
-}
+function test() {
+  document.getElementById("msg").innerText =
+  "Testing application access...";
 
-function showInfo() {
-  document.getElementById("result").innerText =
-  "JavaScript Working Successfully!";
+  window.location.href = "intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end";
 }
 </script>
-
 </body>
 </html>
