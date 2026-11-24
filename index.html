@@ -1,22 +1,12 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="background:#101827;color:white;text-align:center">
+<body>
+<h3>QuantumPay Integration Test</h3>
 
-<h2>QuantumPay Test</h2>
-
-<button onclick="openTest()">OPEN WEBSITE</button>
-
-<p id="status">READY</p>
-
-<script>
-function openTest(){
- document.getElementById("status").innerText="Opening...";
- window.location.href="https://www.google.com";
-}
-</script>
+<a href="upi://pay?pa=test@upi&pn=Test&am=1&cu=INR"
+target="_blank">
+<button>OPEN UPI APP</button>
+</a>
 
 </body>
 </html>
