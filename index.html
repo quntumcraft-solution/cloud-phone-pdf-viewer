@@ -1,0 +1,469 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>RUTIK CINEMA V4</title><style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101014;color:#fff;
+ font-family:Arial,sans-serif;font-size:12px;
+}
+header{
+ background:#19191f;padding:9px 5px;
+ text-align:center;border-bottom:2px solid #e50914;
+}
+.logo{font-size:19px;font-weight:bold;color:#e50914}
+.sub{font-size:9px;color:#aaa;margin-top:3px}
+nav{
+ display:flex;overflow-x:auto;background:#202027;
+ padding:4px;
+}
+button{
+ border:0;cursor:pointer;color:#fff;
+ background:#34343d;padding:8px;font-size:11px;
+ margin:2px;
+}
+button:focus,input:focus{
+ outline:2px solid #e50914;
+}
+nav button.active,.red{background:#e50914}
+#search{padding:6px;background:#19191f}
+input{
+ background:#292930;color:#fff;border:1px solid #555;
+ padding:9px;width:100%;font-size:12px;
+}
+#status{padding:7px;color:#aaa;font-size:10px}
+#list{padding:4px}
+.movie{
+ display:flex;gap:7px;padding:7px 3px;
+ border-bottom:1px solid #303039;min-height:82px;
+}
+.poster{
+ width:50px;height:68px;object-fit:cover;
+ background:#292930;flex-shrink:0;
+}
+.info{flex:1;min-width:0}
+.title{font-weight:bold;font-size:12px;margin:2px 0 5px}
+.meta{font-size:10px;color:#aaa;margin-bottom:5px}
+#pages{text-align:center;padding:8px}
+#pages button{padding:8px 12px}
+#detail,#player,#mylist{display:none;padding:8px}
+#detailPoster{
+ width:75px;height:100px;object-fit:cover;
+ float:left;margin:0 9px 7px 0;
+}
+#detailTitle{font-weight:bold;font-size:15px;margin-bottom:7px}
+#detailText{font-size:11px;line-height:1.5;color:#ccc}
+.clear{clear:both}
+#video{
+ width:100%;max-height:210px;background:#000;
+}
+#playingTitle{font-weight:bold;padding:7px 0}
+#timeInfo{text-align:center;color:#ddd;padding:5px}
+#seekbar{padding:0;height:15px}
+.controls{
+ display:flex;justify-content:center;flex-wrap:wrap;
+ gap:3px;margin:5px 0;
+}
+.controls button{padding:9px 10px}
+#playerStatus{
+ text-align:center;color:#aaa;font-size:10px;padding:5px;
+}
+#mylist .movie{align-items:center}
+footer{
+ text-align:center;padding:12px;color:#777;font-size:9px;
+}
+</style></head><body><header>
+ <div class="logo">RUTIK CINEMA</div>
+ <div class="sub">MOVIES • WEB SERIES • ENTERTAINMENT</div>
+</header><nav id="menu">
+ <button class="active" onclick="category('hindi',this)">HINDI</button>
+ <button onclick="category('indian',this)">INDIAN</button>
+ <button onclick="category('hollywood',this)">HOLLYWOOD</button>
+ <button onclick="category('dubbed',this)">DUBBED</button>
+ <button onclick="category('all',this)">ALL</button>
+ <button onclick="showList()">MY LIST</button>
+</nav><div id="search">
+ <input id="searchInput" placeholder="Search movie..."
+ onkeydown="if(event.key==='Enter')searchMovie()">
+ <button class="red" onclick="searchMovie()">SEARCH</button>
+</div><div id="status">Loading movies...</div>
+<div id="list"></div><div id="pages">
+ <button onclick="changePage(-1)">PREV</button>
+ <span id="pageNo">1</span>
+ <button onclick="changePage(1)">NEXT</button>
+</div><div id="detail">
+ <button onclick="goHome()">← BACK</button>
+ <br><br>
+ <img id="detailPoster" src="" alt="">
+ <div id="detailTitle"></div>
+ <div id="detailText"></div>
+ <div class="clear"></div>
+ <button class="red" onclick="playMovie()">PLAY</button>
+ <button onclick="saveMovie()">+ MY LIST</button>
+</div><div id="mylist">
+ <h3>MY LIST</h3>
+ <div id="savedItems"></div>
+ <button onclick="goHome()">← BACK</button>
+</div><div id="player">
+ <div id="playingTitle">RUTIK CINEMA PLAYER</div>
+ <video id="video" controls playsinline preload="metadata"></video> <div id="timeInfo">00:00 / 00:00</div>
+ <input type="range" id="seekbar" min="0" max="1000" value="0"> <div class="controls">
+  <button onclick="seek(-10)">⏪ 10 SEC</button>
+  <button onclick="togglePlay()">PLAY/PAUSE</button>
+  <button onclick="seek(10)">10 SEC ⏩</button>
+ </div> <div class="controls">
+  <button onclick="restart()">RESTART</button>
+  <button onclick="stopVideo()">STOP</button>
+  <button onclick="closePlayer()">BACK</button>
+ </div>
+ <div id="playerStatus">← 10 sec back | → 10 sec forward | OK play/pause</div>
+</div><footer>RUTIK CINEMA V4</footer><script>
+const API="https://archive.org/advancedsearch.php";
+const META="https://archive.org/metadata/";
+const IMG="https://archive.org/services/img/";
+
+let currentCategory="hindi";
+let currentPage=1;
+let pageSize=8;
+let selected=null;
+let items=[];
+let query="";
+let searchMode=false;
+let controller=null;
+let focusIndex=0;
+
+const video=document.getElementById("video");
+
+function status(t){
+ document.getElementById("status").textContent=t;
+}
+
+function makeQuery(){
+ if(currentCategory==="hindi")
+  return 'mediatype:movies AND language:hin';
+ if(currentCategory==="indian")
+  return 'mediatype:movies AND subject:India';
+ if(currentCategory==="hollywood")
+  return 'mediatype:movies AND language:eng';
+ if(currentCategory==="dubbed")
+  return 'mediatype:movies AND ("Hindi dubbed" OR "Hindi Dubbed")';
+ return 'mediatype:movies';
+}
+
+function category(c,b){
+ currentCategory=c;
+ currentPage=1;
+ searchMode=false;
+ document.getElementById("searchInput").value="";
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ if(b)b.classList.add("active");
+ showScreen("list");
+ loadMovies();
+}
+
+function showScreen(name){
+ ["list","detail","player","mylist"].forEach(id=>{
+  document.getElementById(id).style.display=id===name?"block":"none";
+ });
+ document.getElementById("search").style.display=name==="list"?"block":"none";
+ document.getElementById("pages").style.display=name==="list"?"block":"none";
+ document.getElementById("status").style.display=name==="list"?"block":"none";
+ document.getElementById("menu").style.display=name==="player"?"none":"flex";
+}
+
+async function loadMovies(){
+ let q=searchMode?query:makeQuery();
+ if(controller)controller.abort();
+ controller=new AbortController();
+ status("Searching movies...");
+ document.getElementById("list").innerHTML="";
+ let start=(currentPage-1)*pageSize;
+ let url=API+"?q="+encodeURIComponent(q)+
+ "&fl[]=identifier&fl[]=title&fl[]=year&fl[]=creator"+
+ "&rows="+pageSize+"&start="+start+"&output=json";
+
+ try{
+  let r=await fetch(url,{signal:controller.signal});
+  let d=await r.json();
+  items=d.response.docs||[];
+  render(items);
+  document.getElementById("pageNo").textContent=currentPage;
+  status("Found: "+d.response.numFound);
+ }catch(e){
+  if(e.name!=="AbortError")status("Network error. Try again.");
+ }
+}
+
+function render(arr){
+ let box=document.getElementById("list");
+ box.innerHTML="";
+ if(!arr.length){
+  box.textContent="No movies found.";
+  return;
+ }
+ arr.forEach(m=>{
+  let row=document.createElement("div");
+  row.className="movie";
+  let img=document.createElement("img");
+  img.className="poster";
+  img.loading="lazy";
+  img.src=IMG+encodeURIComponent(m.identifier);
+  img.onerror=function(){this.style.visibility="hidden"};
+
+  let info=document.createElement("div");
+  info.className="info";
+  let title=document.createElement("div");
+  title.className="title";
+  title.textContent=m.title||m.identifier;
+
+  let meta=document.createElement("div");
+  meta.className="meta";
+  meta.textContent=(m.year||"Year unknown")+" | "+(m.creator||"");
+
+  let b=document.createElement("button");
+  b.className="red";
+  b.textContent="DETAILS";
+  b.onclick=()=>openDetail(m);
+
+  info.append(title,meta,b);
+  row.append(img,info);
+  box.append(row);
+ });
+}
+
+function changePage(n){
+ if(currentPage+n<1)return;
+ currentPage+=n;
+ loadMovies();
+}
+
+function searchMovie(){
+ let s=document.getElementById("searchInput").value.trim();
+ if(!s)return;
+ searchMode=true;
+ query='mediatype:movies AND title:('+s+')';
+ currentPage=1;
+ loadMovies();
+}
+
+async function openDetail(m){
+ selected=m;
+ showScreen("detail");
+ document.getElementById("detailTitle").textContent=m.title||m.identifier;
+ document.getElementById("detailPoster").src=IMG+encodeURIComponent(m.identifier);
+ document.getElementById("detailText").textContent="Loading details...";
+
+ try{
+  let r=await fetch(META+encodeURIComponent(m.identifier));
+  let d=await r.json();
+  let x=d.metadata||{};
+  let desc=Array.isArray(x.description)?x.description.join(" "):(x.description||"Description unavailable.");
+  document.getElementById("detailText").textContent=
+   "Year: "+(x.year||m.year||"Unknown")+
+   "\nLanguage: "+(x.language||"Unknown")+
+   "\nCreator: "+(x.creator||m.creator||"Unknown")+
+   "\n\n"+desc.substring(0,700);
+ }catch(e){
+  document.getElementById("detailText").textContent="Details unavailable.";
+ }
+}
+
+function goHome(){
+ showScreen("list");
+}
+
+async function playMovie(){
+ if(!selected)return;
+ if(!confirm("Play only if you have the right to access this video. Continue?"))return;
+
+ document.getElementById("playerStatus").textContent="Finding video...";
+ try{
+  let r=await fetch(META+encodeURIComponent(selected.identifier));
+  let d=await r.json();
+  let files=d.files||[];
+  let candidates=files.filter(f=>{
+   let n=(f.name||"").toLowerCase();
+   return (n.endsWith(".mp4")||n.endsWith(".m3u8"))&&
+   !n.includes("sample")&&!n.includes("trailer");
+  });
+
+  if(!candidates.length){
+   alert("No MP4 or HLS file found.");
+   return;
+  }
+
+  candidates.sort((a,b)=>{
+   let av=a.name.toLowerCase().endsWith(".mp4")?0:1;
+   let bv=b.name.toLowerCase().endsWith(".mp4")?0:1;
+   if(av!==bv)return av-bv;
+   return (Number(b.size)||0)-(Number(a.size)||0);
+  });
+
+  let f=candidates[0];
+  let name=f.name.split("/").map(encodeURIComponent).join("/");
+  let src="https://archive.org/download/"+
+   encodeURIComponent(selected.identifier)+"/"+name;
+
+  startPlayer(src,selected.title||"Movie");
+ }catch(e){
+  alert("Unable to load video information.");
+ }
+}
+
+function startPlayer(src,title){
+ showScreen("player");
+ document.getElementById("playingTitle").textContent=title;
+ video.pause();
+ video.removeAttribute("src");
+ video.load();
+ video.src=src;
+ video.load();
+ video.play().catch(()=>{
+  document.getElementById("playerStatus").textContent="Press OK or Play.";
+ });
+}
+
+function seek(s){
+ try{
+  if(!isFinite(video.duration)||video.duration<=0){
+   document.getElementById("playerStatus").textContent="Seeking unavailable.";
+   return;
+  }
+  let t=Math.max(0,Math.min(video.duration,video.currentTime+s));
+  if(video.seekable.length){
+   let valid=false;
+   for(let i=0;i<video.seekable.length;i++){
+    if(t>=video.seekable.start(i)&&t<=video.seekable.end(i)){
+     valid=true;break;
+    }
+   }
+   if(!valid){
+    document.getElementById("playerStatus").textContent="Position not seekable.";
+    return;
+   }
+  }
+  video.currentTime=t;
+ }catch(e){
+  document.getElementById("playerStatus").textContent="Seeking not supported.";
+ }
+}
+
+function togglePlay(){
+ if(video.paused)video.play().catch(()=>{});
+ else video.pause();
+}
+function restart(){
+ try{video.currentTime=0;video.play().catch(()=>{})}catch(e){}
+}
+function stopVideo(){
+ video.pause();
+ try{video.currentTime=0}catch(e){}
+}
+function closePlayer(){
+ video.pause();
+ video.removeAttribute("src");
+ video.load();
+ showScreen("detail");
+}
+
+function fmt(t){
+ if(!isFinite(t))return "00:00";
+ let m=Math.floor(t/60),s=Math.floor(t%60);
+ return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+
+video.addEventListener("timeupdate",()=>{
+ let t=video.currentTime||0,d=video.duration;
+ document.getElementById("timeInfo").textContent=fmt(t)+" / "+fmt(d);
+ if(isFinite(d)&&d>0)document.getElementById("seekbar").value=t/d*1000;
+});
+
+document.getElementById("seekbar").addEventListener("change",function(){
+ if(isFinite(video.duration)&&video.duration>0)
+  video.currentTime=Number(this.value)/1000*video.duration;
+});
+
+video.addEventListener("playing",()=>{
+ document.getElementById("playerStatus").textContent="Playing";
+});
+video.addEventListener("waiting",()=>{
+ document.getElementById("playerStatus").textContent="Buffering...";
+});
+video.addEventListener("error",()=>{
+ document.getElementById("playerStatus").textContent="Video error. Try another file.";
+});
+
+function getSaved(){
+ try{return JSON.parse(localStorage.getItem("rutikCinemaList")||"[]")}
+ catch(e){return []}
+}
+function saveMovie(){
+ if(!selected)return;
+ let a=getSaved();
+ if(!a.some(x=>x.identifier===selected.identifier)){
+  a.push(selected);
+  localStorage.setItem("rutikCinemaList",JSON.stringify(a));
+ }
+ alert("Added to My List");
+}
+function showList(){
+ showScreen("mylist");
+ let box=document.getElementById("savedItems");
+ box.innerHTML="";
+ let a=getSaved();
+ if(!a.length){box.textContent="Your list is empty.";return;}
+ a.forEach(m=>{
+  let row=document.createElement("div");
+  row.className="movie";
+  let t=document.createElement("div");
+  t.className="info";
+  t.textContent=m.title||m.identifier;
+  let b=document.createElement("button");
+  b.textContent="OPEN";
+  b.className="red";
+  b.onclick=()=>openDetail(m);
+  let del=document.createElement("button");
+  del.textContent="REMOVE";
+  del.onclick=()=>{
+   localStorage.setItem("rutikCinemaList",JSON.stringify(
+    getSaved().filter(x=>x.identifier!==m.identifier)
+   ));
+   showList();
+  };
+  row.append(t,b,del);
+  box.append(row);
+ });
+}
+
+/* Keypad controls */
+document.addEventListener("keydown",function(e){
+ let playerOpen=document.getElementById("player").style.display==="block";
+
+ if(playerOpen){
+  if(e.key==="ArrowRight"||e.keyCode===22){
+   e.preventDefault();seek(10);
+  }else if(e.key==="ArrowLeft"||e.keyCode===21){
+   e.preventDefault();seek(-10);
+  }else if(e.key==="Enter"||e.key===" "||e.keyCode===23){
+   e.preventDefault();togglePlay();
+  }else if(e.key==="Escape"||e.key==="Backspace"||e.keyCode===4){
+   e.preventDefault();closePlayer();
+  }else if(e.key==="0"){
+   e.preventDefault();restart();
+  }
+  return;
+ }
+
+ if(e.key==="Escape"||e.key==="Backspace"||e.keyCode===4){
+  if(document.getElementById("detail").style.display==="block"){
+   goHome();e.preventDefault();
+  }else if(document.getElementById("mylist").style.display==="block"){
+   goHome();e.preventDefault();
+  }
+ }
+});
+
+loadMovies();
+</script></body>
+  </html>
