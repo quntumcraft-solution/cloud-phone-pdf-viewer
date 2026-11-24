@@ -2,36 +2,19 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QuantumPay Test</title>
 </head>
 <body style="background:#101827;color:white;text-align:center">
 
-<h2>QuantumPay 4G</h2>
+<h2>QuantumPay Test</h2>
 
-<button onclick="test1()">Test JavaScript</button>
-<button onclick="test2()">Test UPI Link</button>
-<button onclick="test3()">Test App Link</button>
+<button onclick="openTest()">OPEN WEBSITE</button>
 
-<p id="result">Ready</p>
+<p id="status">READY</p>
 
 <script>
-function test1(){
- document.getElementById("result").innerText =
- "JavaScript Working";
-}
-
-function test2(){
- document.getElementById("result").innerText =
- "Testing UPI Link";
-
- window.location.href =
- "upi://pay?pa=test@upi&pn=Test&am=1&cu=INR";
-}
-
-function test3(){
- document.getElementById("result").innerText =
- "Testing Gupshup App";
- window.location.href = "gupshup://";
+function openTest(){
+ document.getElementById("status").innerText="Opening...";
+ window.location.href="https://www.google.com";
 }
 </script>
 
