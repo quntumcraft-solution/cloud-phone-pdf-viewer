@@ -1,29 +1,19 @@
-<!DOCTYPE html>
-<html>
-<body style="background:#fff;color:#000;font-size:20px;padding:15px;">
-
-<h3>Gupshup Pay Test</h3>
-
-<button onclick="test()" style="font-size:20px;padding:15px;">
-OPEN GUPSHUP PAY
-</button>
-
-<div id="result" style="font-size:20px;margin-top:20px;word-wrap:break-word;"></div>
+<pre id="out" style="font-size:18px;white-space:pre-wrap;"></pre>
 
 <script>
-function test() {
-  let r = document.getElementById("result");
+let e = window.external;
+let p = e;
 
-  try {
-    let x = window.external.openURL("gupshup://");
-    r.innerHTML = "Result: " + String(x);
-  } catch(e) {
-    r.innerHTML =
-      "ERROR:<br>" + e.name +
-      "<br>" + e.message;
-  }
+let result = "";
+
+while (p) {
+  Object.getOwnPropertyNames(p).forEach(k => {
+    try {
+      result += k + " : " + typeof e[k] + "\n";
+    } catch(err) {}
+  });
+  p = Object.getPrototypeOf(p);
 }
-</script>
 
-</body>
-</html>
+document.getElementById("out").textContent = result;
+</script>
